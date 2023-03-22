@@ -5,7 +5,7 @@ import * as React from 'react'
 
 // 🐨 use React.lazy to create a Globe component which uses a dynamic import
 // to get the Globe component from the '../globe' module.
-const Globe = React.lazy(() => import('../globe'))
+let Globe = React.lazy(() => import('../globe'))
 
 function App() {
   const [showGlobe, setShowGlobe] = React.useState(false)
@@ -23,7 +23,11 @@ function App() {
         padding: '2rem',
       }}
     >
-      <label style={{marginBottom: '1rem'}}>
+      <label
+        style={{marginBottom: '1rem'}}
+        onMouseEnter={loadGlobe}
+        onFocus={loadGlobe}
+      >
         <input
           type="checkbox"
           checked={showGlobe}
@@ -39,6 +43,15 @@ function App() {
     </div>
   )
 }
+
+function loadGlobe() {
+  import('../globe')
+    .then(module => {
+      Globe = module.default
+    })
+    .catch(error => console.error(error))
+}
+
 // 🦉 Note that if you're not on the isolated page, then you'll notice that this
 // app actually already has a React.Suspense component higher up in the tree
 // where this component is rendered, so you *could* just rely on that one.
