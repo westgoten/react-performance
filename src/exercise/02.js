@@ -3,8 +3,8 @@
 
 import * as React from 'react'
 import {useCombobox} from '../use-combobox'
-import {getItems} from '../filter-cities'
-import {useForceRerender} from '../utils'
+import {getItems} from '../workerized-filter-cities'
+import {useAsync, useForceRerender} from '../utils'
 
 function Menu({
   items,
@@ -58,11 +58,15 @@ function ListItem({
 
 function App() {
   const forceRerender = useForceRerender()
-  const [inputValue, setInputValue] = React.useState('')
+  const [input, setInput] = React.useState('')
+  const inputValue = React.useDeferredValue(input)
 
-  // 🐨 wrap getItems in a call to `React.useMemo`
-  const allItems = React.useMemo(() => getItems(inputValue), [inputValue])
-  const items = allItems.slice(0, 100)
+  const {data, error, run} = useAsync()
+  const items = data?.slice(0, 100) ?? []
+
+  React.useEffect(() => {
+    run(getItems(inputValue))
+  }, [run, inputValue])
 
   const {
     selectedItem,
@@ -76,7 +80,7 @@ function App() {
   } = useCombobox({
     items,
     inputValue,
-    onInputValueChange: ({inputValue: newValue}) => setInputValue(newValue),
+    onInputValueChange: ({inputValue: newValue}) => setInput(newValue),
     onSelectedItemChange: ({selectedItem}) =>
       alert(
         selectedItem
@@ -97,13 +101,17 @@ function App() {
             &#10005;
           </button>
         </div>
-        <Menu
-          items={items}
-          getMenuProps={getMenuProps}
-          getItemProps={getItemProps}
-          highlightedIndex={highlightedIndex}
-          selectedItem={selectedItem}
-        />
+        {error ? (
+          <p>Something went wrong. Please, try again.</p>
+        ) : (
+          <Menu
+            items={items}
+            getMenuProps={getMenuProps}
+            getItemProps={getItemProps}
+            highlightedIndex={highlightedIndex}
+            selectedItem={selectedItem}
+          />
+        )}
       </div>
     </div>
   )
