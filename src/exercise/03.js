@@ -3,36 +3,10 @@
 
 import * as React from 'react'
 import {useCombobox} from '../use-combobox'
-import {getItems} from '../workerized-filter-cities'
+import {getItems} from '../filter-cities'
 import {useAsync, useForceRerender} from '../utils'
 
-function Menu({
-  items,
-  getMenuProps,
-  getItemProps,
-  highlightedIndex,
-  selectedItem,
-}) {
-  return (
-    <ul {...getMenuProps()}>
-      {items.map((item, index) => (
-        <ListItem
-          key={item.id}
-          getItemProps={getItemProps}
-          item={item}
-          index={index}
-          selectedItem={selectedItem}
-          highlightedIndex={highlightedIndex}
-        >
-          {item.name}
-        </ListItem>
-      ))}
-    </ul>
-  )
-}
-// 🐨 Memoize the Menu here using React.memo
-
-function ListItem({
+function BaseListItem({
   getItemProps,
   item,
   index,
@@ -56,7 +30,37 @@ function ListItem({
     />
   )
 }
-// 🐨 Memoize the ListItem here using React.memo
+const ListItem = React.memo(BaseListItem)
+
+function BaseMenu({
+  items,
+  getMenuProps,
+  getItemProps,
+  highlightedIndex,
+  selectedItem,
+}) {
+  return (
+    <ul {...getMenuProps()}>
+      {items.map((item, index) => (
+        <ListItem
+          key={item.id}
+          getItemProps={getItemProps}
+          item={item}
+          index={index}
+          selectedItem={selectedItem}
+          highlightedIndex={highlightedIndex}
+        >
+          {item.name}
+        </ListItem>
+      ))}
+    </ul>
+  )
+}
+const Menu = React.memo(BaseMenu)
+
+async function asyncGetItems(filter) {
+  return getItems(filter)
+}
 
 function App() {
   const forceRerender = useForceRerender()
@@ -64,9 +68,9 @@ function App() {
 
   const {data: allItems, run} = useAsync({data: [], status: 'pending'})
   React.useEffect(() => {
-    run(getItems(inputValue))
+    run(asyncGetItems(inputValue))
   }, [inputValue, run])
-  const items = allItems.slice(0, 100)
+  const items = React.useMemo(() => allItems.slice(0, 100), [allItems])
 
   const {
     selectedItem,
