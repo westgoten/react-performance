@@ -30,7 +30,22 @@ function BaseListItem({
     />
   )
 }
-const ListItem = React.memo(BaseListItem)
+const ListItem = React.memo(BaseListItem, (prevProps, nextProps) => {
+  return (
+    prevProps.getItemProps === nextProps.getItemProps &&
+    prevProps.item === nextProps.item &&
+    prevProps.selectedItem === nextProps.selectedItem &&
+    prevProps.index === nextProps.index &&
+    !(
+      prevProps.index === prevProps.highlightedIndex &&
+      nextProps.index !== nextProps.highlightedIndex
+    ) &&
+    !(
+      prevProps.index !== prevProps.highlightedIndex &&
+      nextProps.index === nextProps.highlightedIndex
+    )
+  )
+})
 
 function BaseMenu({
   items,
