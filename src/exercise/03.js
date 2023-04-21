@@ -31,21 +31,23 @@ function BaseListItem({
   )
 }
 const ListItem = React.memo(BaseListItem, (prevProps, nextProps) => {
-  return (
-    prevProps.getItemProps === nextProps.getItemProps &&
-    prevProps.item === nextProps.item &&
-    prevProps.selectedItem === nextProps.selectedItem &&
-    prevProps.index === nextProps.index &&
-    !(
-      prevProps.index === prevProps.highlightedIndex &&
-      nextProps.index !== nextProps.highlightedIndex
-    ) &&
-    !(
-      prevProps.index !== prevProps.highlightedIndex &&
-      nextProps.index === nextProps.highlightedIndex
-    )
-  )
+  const propsKeys = Object.keys(prevProps)
+  return propsKeys.reduce((shouldAvoidRender, propKey) => {
+    if (propKey === 'highlightedIndex') {
+      return shouldAvoidRender && !hasHighlightChanged(prevProps, nextProps)
+    }
+    return shouldAvoidRender && prevProps[propKey] === nextProps[propKey]
+  }, true)
 })
+
+function hasHighlightChanged(prevProps, nextProps) {
+  if (prevProps.highlightedIndex !== nextProps.highlightedIndex) {
+    const wasHighlighted = prevProps.index === prevProps.highlightedIndex
+    const isHighlighted = nextProps.index === nextProps.highlightedIndex
+    return wasHighlighted !== isHighlighted
+  }
+  return false
+}
 
 function BaseMenu({
   items,
