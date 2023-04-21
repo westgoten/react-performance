@@ -10,12 +10,10 @@ function BaseListItem({
   getItemProps,
   item,
   index,
-  selectedItem,
-  highlightedIndex,
+  isSelected,
+  isHighlighted,
   ...props
 }) {
-  const isSelected = selectedItem?.id === item.id
-  const isHighlighted = highlightedIndex === index
   return (
     <li
       {...getItemProps({
@@ -30,24 +28,7 @@ function BaseListItem({
     />
   )
 }
-const ListItem = React.memo(BaseListItem, (prevProps, nextProps) => {
-  const propsKeys = Object.keys(prevProps)
-  return propsKeys.reduce((shouldAvoidRender, propKey) => {
-    if (propKey === 'highlightedIndex') {
-      return shouldAvoidRender && !hasHighlightChanged(prevProps, nextProps)
-    }
-    return shouldAvoidRender && prevProps[propKey] === nextProps[propKey]
-  }, true)
-})
-
-function hasHighlightChanged(prevProps, nextProps) {
-  if (prevProps.highlightedIndex !== nextProps.highlightedIndex) {
-    const wasHighlighted = prevProps.index === prevProps.highlightedIndex
-    const isHighlighted = nextProps.index === nextProps.highlightedIndex
-    return wasHighlighted !== isHighlighted
-  }
-  return false
-}
+const ListItem = React.memo(BaseListItem)
 
 function BaseMenu({
   items,
@@ -64,8 +45,8 @@ function BaseMenu({
           getItemProps={getItemProps}
           item={item}
           index={index}
-          selectedItem={selectedItem}
-          highlightedIndex={highlightedIndex}
+          isSelected={selectedItem?.id === item.id}
+          isHighlighted={highlightedIndex === index}
         >
           {item.name}
         </ListItem>
