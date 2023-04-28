@@ -2,10 +2,9 @@
 // http://localhost:3000/isolated/exercise/04.js
 
 import * as React from 'react'
-// 🐨 import the useVirtual hook from react-virtual
-// import {useVirtual} from 'react-virtual'
+import {useVirtual} from 'react-virtual'
 import {useCombobox} from '../use-combobox'
-import {getItems} from '../workerized-filter-cities'
+import {getItems} from '../filter-cities'
 import {useAsync, useForceRerender} from '../utils'
 
 // 💰 I made this for you, you'll need it later:
@@ -87,13 +86,17 @@ function ListItem({
   )
 }
 
+async function asyncGetItems(filter) {
+  return getItems(filter)
+}
+
 function App() {
   const forceRerender = useForceRerender()
   const [inputValue, setInputValue] = React.useState('')
 
   const {data: items, run} = useAsync({data: [], status: 'pending'})
   React.useEffect(() => {
-    run(getItems(inputValue))
+    run(asyncGetItems(inputValue))
   }, [inputValue, run])
 
   // 🐨 create a listRef with React.useRef
